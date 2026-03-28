@@ -12,26 +12,22 @@ const PAMELA_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/p
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  /** Mobile / “reduzir movimento”: fundo e hero mais leves (menos blur e JS em loop) */
+  const [lightMotion, setLightMotion] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches
+  );
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const mq = window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)');
+    const update = () => setLightMotion(mq.matches);
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
   }, []);
-
-  const floatingParticles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    delay: Math.random() * 5,
-    duration: 4 + Math.random() * 6,
-    size: 4 + Math.random() * 8,
-  }));
 
   const products = [
     { 
@@ -104,7 +100,7 @@ export default function Home() {
       <div className="min-h-screen bg-white overflow-x-hidden relative w-full max-w-[100vw]">
       {/* Fixed Header/Navbar */}
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-[#D4847C]/10 shadow-[0_4px_24px_rgba(45,31,28,0.06)]"
+        className="fixed top-0 left-0 right-0 z-50 border-b border-[#D4847C]/10 bg-white/95 shadow-[0_4px_24px_rgba(45,31,28,0.06)] md:bg-white/80 md:backdrop-blur-2xl"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -168,59 +164,47 @@ export default function Home() {
           </motion.a>
         </div>
       </motion.header>
-      {/* Animated Background */}
+      {/* Background: estático no mobile para evitar blur/animações pesadas */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.div
-          className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F5E8E6]/30 to-transparent rounded-full blur-3xl"
-          animate={{ 
-            scale: [1, 1.15, 1],
-            opacity: [0.3, 0.5, 0.3],
-            x: [0, 50, 0],
-            y: [0, 30, 0]
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-[#E9DDD9]/30 to-transparent rounded-full blur-3xl"
-          animate={{ 
-            scale: [1.1, 1, 1.1],
-            opacity: [0.4, 0.6, 0.4],
-            x: [0, -50, 0],
-            y: [0, -30, 0]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-br from-[#C77169]/10 to-transparent rounded-full blur-3xl"
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2],
-            rotate: [0, 180, 360]
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-        />
-        {/* Floating particles */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-[#C77169]/20 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0, 0.6, 0],
-              scale: [0, 1, 0]
-            }}
-            transition={{
-              duration: 8 + Math.random() * 4,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
+        {lightMotion ? (
+          <>
+            <div className="absolute top-0 right-0 h-[min(80vw,420px)] w-[min(80vw,420px)] rounded-full bg-gradient-to-br from-[#F5E8E6]/40 to-transparent md:h-[600px] md:w-[600px]" />
+            <div className="absolute bottom-0 left-0 h-[min(70vw,380px)] w-[min(70vw,380px)] rounded-full bg-gradient-to-tr from-[#E9DDD9]/35 to-transparent md:h-[600px] md:w-[600px]" />
+            <div className="absolute left-1/2 top-1/2 h-[min(60vw,320px)] w-[min(60vw,320px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-[#C77169]/8 to-transparent md:h-[400px] md:w-[400px]" />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F5E8E6]/30 to-transparent rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.15, 1],
+                opacity: [0.3, 0.5, 0.3],
+                x: [0, 50, 0],
+                y: [0, 30, 0],
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-[#E9DDD9]/30 to-transparent rounded-full blur-3xl"
+              animate={{
+                scale: [1.1, 1, 1.1],
+                opacity: [0.4, 0.6, 0.4],
+                x: [0, -50, 0],
+                y: [0, -30, 0],
+              }}
+              transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-br from-[#C77169]/10 to-transparent rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.4, 0.2],
+                rotate: [0, 180, 360],
+              }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </>
+        )}
       </div>
 
       {/* Hero Section */}
@@ -231,38 +215,46 @@ export default function Home() {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", duration: 0.8, bounce: 0.3, delay: 0.2 }}
+            transition={{ type: 'spring', duration: 0.8, bounce: 0.3, delay: 0.2 }}
             className="relative mx-auto mb-10"
           >
-            <motion.div 
-              className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full relative mx-auto"
-              animate={{ 
-                y: [0, -10, 0],
-              }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
+            {lightMotion ? (
+              <div className="relative mx-auto h-28 w-28 rounded-full sm:h-32 sm:w-32 md:h-40 md:w-40">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#C77169]/15 to-transparent" />
+                <img
+                  src={LOGO_URL}
+                  alt="CaprichaPam Logo"
+                  className="relative z-10 h-full w-full rounded-full object-contain"
+                  width={160}
+                  height={160}
+                  decoding="async"
+                />
+              </div>
+            ) : (
               <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-[#C77169]/20 to-transparent"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0, 0.3]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <img
-                src={LOGO_URL}
-                alt="CaprichaPam Logo"
-                className="w-full h-full object-contain rounded-full relative z-10"
-              />
-            </motion.div>
+                className="relative mx-auto h-28 w-28 rounded-full sm:h-32 sm:w-32 md:h-40 md:w-40"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-gradient-to-br from-[#C77169]/20 to-transparent"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0, 0.3],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                />
+                <img
+                  src={LOGO_URL}
+                  alt="CaprichaPam Logo"
+                  className="relative z-10 h-full w-full rounded-full object-contain"
+                />
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.h1
@@ -271,21 +263,31 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <motion.span
-              className="inline-block"
-              animate={{ y: [0, -3, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              Personalizando momentos
-            </motion.span>
-            <br/>
-            <motion.span 
-              className="font-serif italic text-[#C77169] inline-block"
-              animate={{ y: [0, 3, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            >
-              para lembrar histórias
-            </motion.span>
+            {lightMotion ? (
+              <>
+                <span className="inline-block">Personalizando momentos</span>
+                <br />
+                <span className="inline-block font-serif italic text-[#C77169]">para lembrar histórias</span>
+              </>
+            ) : (
+              <>
+                <motion.span
+                  className="inline-block"
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  Personalizando momentos
+                </motion.span>
+                <br />
+                <motion.span
+                  className="inline-block font-serif italic text-[#C77169]"
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                >
+                  para lembrar histórias
+                </motion.span>
+              </>
+            )}
           </motion.h1>
           
           <motion.p
