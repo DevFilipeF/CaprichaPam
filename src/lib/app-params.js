@@ -1,54 +1,97 @@
 const isNode = typeof window === 'undefined';
-const windowObj = isNode ? { localStorage: new Map() } : window;
-const storage = windowObj.localStorage;
 
 const toSnakeCase = (str) => {
-	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
-}
+  return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+};
 
-const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl = false } = {}) => {
-	if (isNode) {
-		return defaultValue;
-	}
-	const storageKey = `base44_${toSnakeCase(paramName)}`;
-	const urlParams = new URLSearchParams(window.location.search);
-	const searchParam = urlParams.get(paramName);
-	if (removeFromUrl) {
-		urlParams.delete(paramName);
-		const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""
-			}${window.location.hash}`;
-		window.history.replaceState({}, document.title, newUrl);
-	}
-	if (searchParam) {
-		storage.setItem(storageKey, searchParam);
-		return searchParam;
-	}
-	if (defaultValue) {
-		storage.setItem(storageKey, defaultValue);
-		return defaultValue;
-	}
-	const storedValue = storage.getItem(storageKey);
-	if (storedValue) {
-		return storedValue;
-	}
-	return null;
-}
+const getEnv = (key) => {
+  const value = import.meta.env[key];
+  if (!value) {
+    console.error(`[ENV ERROR] ${key} is not defined`);
+  }
+  return value;
+};
+
+const getUrlParam = (paramName) => {
+  if (isNode) return null;
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(paramName);
+};
+
+const getStorage = (key) => {
+  if (isNode) return null;
+  return window.localStorage.getItem(key);
+};
+
+const setStorage = (key, value) => {
+  if (isNode) return;
+  window.localStorage.setItem(key, value);
+};
+
+const clearStorage = (key) => {
+  if (isNode) return;
+  window.localStorage.removeItem(key);
+};
+
+const resolveParam = (paramName, envKey) => {
+  const storageKey = `base44_${toSnakeCase(paramName)}`;
+
+  // 1. URL tem prioridade máxima
+  const urlValue = getUrlParam(paramName);
+  if (urlValue) {
+    setStorage(storageKey, urlValue);
+    return urlValue;
+  }
+
+  // 2. ENV (fonte confiável)
+  const envValue = getEnv(envKey);
+  if (envValue) {
+    return envValue;
+  }
+
+  // 3. fallback: localStorage
+  const stored = getStorage(storageKey);
+  if (stored) {
+    return stored;
+  }
+
+  return null;
+};
 
 const getAppParams = () => {
-	if (getAppParamValue("clear_access_token") === 'true') {
-		storage.removeItem('base44_access_token');
-		storage.removeItem('token');
-	}
-	return {
-		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
-		token: getAppParamValue("access_token", { removeFromUrl: true }),
-		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
-		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
-		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
-	}
-}
+  const appId = resolveParam("app_id", "VITE_BASE44_APP_ID");
+  const token = resolveParam("access_token", null);
+  const functionsVersion = resolveParam(
+    "functions_version",
+    "VITE_BASE44_FUNCTIONS_VERSION"
+  );
+  const appBaseUrl = resolveParam(
+    "app_base_url",
+    "VITE_BASE44_APP_BASE_URL"
+  );
 
+  // Validação crítica
+  if (!appBaseUrl) {
+    throw new Error(
+      "[FATAL] appBaseUrl is not defined. Check your .env (VITE_BASE44_APP_BASE_URL)"
+    );
+  }
+
+  console.log("[DEBUG] Base44 Config:", {
+    appId,
+    functionsVersion,
+    appBaseUrl,
+  });
+
+  return {
+    appId,
+    token,
+    functionsVersion,
+    appBaseUrl,
+    fromUrl: isNode ? null : window.location.href,
+  };
+};
 
 export const appParams = {
-	...getAppParams()
-}
+  ...getAppParams(),
+};

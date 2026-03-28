@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { Heart, Sparkles, Gift, Star, ShoppingBag, Palette, Scissors, Package, ArrowRight, ChevronDown, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SplashScreen from '../components/SplashScreen';
+import { createPageUrl } from '@/utils';
 
 const SHOPEE_URL = "https://shopee.com.br/caprichapam";
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/user_6983e88ebd9a77b9810df7db/a8b597fb9_fotor-20250201195419.png";
@@ -99,7 +100,7 @@ export default function Home() {
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       </AnimatePresence>
       
-      <div className="min-h-screen bg-white overflow-x-hidden relative">
+      <div className="min-h-screen bg-white overflow-x-hidden relative w-full max-w-[100vw]">
       {/* Fixed Header/Navbar */}
       <motion.header
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-[#D4847C]/10 shadow-[0_4px_24px_rgba(45,31,28,0.06)]"
@@ -586,6 +587,40 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Personalizer CTA Banner */}
+      <section className="py-20 px-6 lg:px-8 bg-gradient-to-br from-[#fdf6f2] to-[#f5e8e3]">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center gap-6"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 text-[#C77169] rounded-full text-sm font-medium border border-[#e8d0c8]">
+              <Sparkles className="w-4 h-4" />
+              Novidade
+            </div>
+            <h2 className="text-3xl md:text-4xl font-light text-[#3D1F1A] tracking-tight">
+              Visualize seu <span className="font-serif italic text-[#C77169]">Cartão Chá Revelação</span>
+            </h2>
+            <p className="text-[#6B5B57] text-lg font-light max-w-xl">
+              Digite o nome e veja a personalização acontecer em tempo real antes de encomendar!
+            </p>
+            <motion.a
+              href={createPageUrl('Personalizador')}
+              className="inline-flex items-center gap-3 text-white px-10 py-4 rounded-full font-medium text-base shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #8B4F40, #C77169)' }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Personalizar Agora</span>
+              <ArrowRight className="w-5 h-5" />
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 
