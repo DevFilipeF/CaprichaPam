@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ShoppingBag, ArrowRight, User, ArrowLeft } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import cardPreviewImage from './img/cards.png';
 
-const SHOPEE_URL = "https://shopee.com.br/caprichapam";
-
-const CARD_IMAGE_URL = "https://media.base44.com/images/public/6983e9ae10a7bb6a76ce0afc/8d034496b_ChatGPTImage11demarde202623_24_03.png";
+const SHOPEE_URL =
+  "https://shopee.com.br/Centro-de-mesa-agradecimento-personalizado-ch%C3%A1-revela%C3%A7%C3%A3o-ursinhos-em-cores-neutras-bege-i.418995096.22092850923?extraParams=%7B%22display_model_id%22%3A219593397935%2C%22model_selection_logic%22%3A3%7D";
 
 function CardPreview({ name }) {
   return (
@@ -22,7 +22,7 @@ function CardPreview({ name }) {
       }}>
         {/* Foto real do cartão */}
         <img
-          src={CARD_IMAGE_URL}
+          src={cardPreviewImage}
           alt="Cartão Chá Revelação"
           style={{ width: '100%', height: 'auto', display: 'block' }}
         />

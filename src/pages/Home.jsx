@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import SplashScreen from '../components/SplashScreen';
 import { createPageUrl } from '@/utils';
 
-const SHOPEE_URL = "https://shopee.com.br/caprichapam";
+const SHOPEE_URL =
+  "https://shopee.com.br/Centro-de-mesa-agradecimento-personalizado-ch%C3%A1-revela%C3%A7%C3%A3o-ursinhos-em-cores-neutras-bege-i.418995096.22092850923?extraParams=%7B%22display_model_id%22%3A219593397935%2C%22model_selection_logic%22%3A3%7D";
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/user_6983e88ebd9a77b9810df7db/a8b597fb9_fotor-20250201195419.png";
 const PAMELA_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6983e9ae10a7bb6a76ce0afc/6e051fcf5_FPredimension.jpg";
 
